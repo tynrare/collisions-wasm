@@ -10,8 +10,11 @@
 class Collisions {
 	private:
 		std::map<std::string, b2AABB*> b2AABBs;
+		int extend_margin;
 	public:
-	Collisions() { };
+	Collisions(int extend_margin = 1) {
+		this->extend_margin = extend_margin;
+	};
 	
 	inline void b2AABB_setPos(b2AABB *a, float x, float y) {
 		b2Vec2 extents = b2AABB_Extents(*a);
@@ -131,8 +134,6 @@ class Collisions {
 	}
 	
 	inline b2Vec2 test(	b2AABB *a, float tx, float ty) {
-		
-		const int extend_margin = 1;
 		b2Vec2 target = { tx, ty };
 		b2Vec2 extents = b2AABB_Extents(*a);
 		b2AABB box_at_goal = b2AABB_ConstructFromCenterSize(target.x, target.y, extents.x * 2, extents.y * 2);
