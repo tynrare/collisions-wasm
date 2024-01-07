@@ -5,12 +5,34 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <stdlib.h>
 
 class Collisions {
 	private:
-		std::map<std::string, b2AABB> b2AABBs;
+		std::map<std::string, b2AABB*> b2AABBs;
 	public:
 	Collisions() { };
+	
+	inline void b2AABB_setPos(b2AABB *a, float x, float y) {
+		b2Vec2 extents = b2AABB_Extents(*a);
+		a->lowerBound.x = x - extents.x;
+		a->lowerBound.y = y - extents.y;
+		a->upperBound.x = x + extents.x;
+		a->upperBound.y = y + extents.y;
+	}
+
+	inline b2AABB *b2AABB_ConstructFromCenterSizeP(float x, float y, float w, float h) {
+		float halfwidth = w / 2;
+		float halfheight = h / 2;
+
+		b2AABB *aabb = (b2AABB*)malloc(sizeof(b2AABB));
+		aabb->lowerBound.x = x - halfwidth;
+		aabb->lowerBound.y = y - halfheight;
+		aabb->upperBound.x = x + halfwidth;
+		aabb->upperBound.y = y + halfheight;
+
+		return aabb;
+	}
 	
 	inline b2AABB b2AABB_ConstructFromCenterSize(float x, float y, float w, float h) {
 		float halfwidth = w / 2;
@@ -108,29 +130,32 @@ class Collisions {
 		return pos;
 	}
 	
-	inline b2Vec2 test(b2AABB &a, float tx, float ty) {
+	inline b2Vec2 test(	b2AABB *a, float tx, float ty) {
 		
 		const int extend_margin = 1;
 		b2Vec2 target = { tx, ty };
-		b2Vec2 extents = b2AABB_Extents(a);
+		b2Vec2 extents = b2AABB_Extents(*a);
 		b2AABB box_at_goal = b2AABB_ConstructFromCenterSize(target.x, target.y, extents.x * 2, extents.y * 2);
-		b2AABB boardphase = b2AABB_Union(a, box_at_goal);
+		b2AABB boardphase = b2AABB_Union(*a, box_at_goal);
 
 		// tooptimize
 		std::vector<b2AABB> colliders;
 		std::vector<b2AABB> colliders_extended;
 		for (auto &e : b2AABBs) {
-			b2AABB box = e.second;
+			b2AABB *box = e.second;
+			if (box == a) {
+				continue;
+			}
 
-			if (b2AABB_Overlaps(boardphase, box)) {
-				b2AABB extended_box = b2AABB_ExtendBySize(box, extents.x * 2 - extend_margin * 2, extents.y * 2 - extend_margin * 2);
+			if (b2AABB_Overlaps(boardphase, *box)) {
+				b2AABB extended_box = b2AABB_ExtendBySize(*box, extents.x * 2 - extend_margin * 2, extents.y * 2 - extend_margin * 2);
 				colliders_extended.push_back(extended_box);
-				colliders.push_back(box);
+				colliders.push_back(*box);
 			}
 		}
 		
 		// push out of any bounds
-		b2Vec2 newpos = simpleAABBCollision(a, colliders, extend_margin);
+		b2Vec2 newpos = simpleAABBCollision(*a, colliders, extend_margin);
 		// swept move
 		int iterations = 0;
 		newpos = sweptAABBCollision(&iterations, newpos, target, colliders_extended, extend_margin);
@@ -139,17 +164,23 @@ class Collisions {
 	}
 	
 	inline b2AABB *addAABB(const char *id, float x, float y, float w, float h) {
-		b2AABB aabb = b2AABB_ConstructFromCenterSize(x, y, w, h);
+		b2AABB *aabb = b2AABB_ConstructFromCenterSizeP(x, y, w, h);
 		const auto it = b2AABBs.insert({std::string(id), aabb});
 		
-		return &it.first->second;
+		return aabb;
 	}
 	
 	inline void eraseAABB(const char *id) {
-		b2AABBs.erase(b2AABBs.find(std::string(id)));
+		auto it = b2AABBs.find(std::string(id));
+		b2AABBs.erase(it);
+		free(it->second);
 	}
 	
 	inline void clear() {
+		for (auto &e : b2AABBs) {
+			free(e.second);
+		}
+
 		b2AABBs.clear();
 	}
 };

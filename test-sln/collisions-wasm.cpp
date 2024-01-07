@@ -8,9 +8,9 @@ int main()
 {
     Collisions *collisions = new Collisions();
     collisions->addAABB("a", 0, 0, 16, 16);
-    b2AABB testbox = collisions->b2AABB_ConstructFromCenterSize(-32, 0, 16, 16);
-    b2Vec2 targetpos = { 32, 0 };
-    b2Vec2 res = collisions->test(testbox, targetpos);
+    //b2AABB testbox = collisions->b2AABB_ConstructFromCenterSize(-32, 0, 16, 16);
+    b2AABB *testbox = collisions->addAABB("b", -32, 0, 16, 16);
+    b2Vec2 res = collisions->test(testbox, 32, 0);
     delete collisions;
     std::cout << "x: " << res.x << " y: " << res.y;
 }

@@ -3,3 +3,4 @@ exports
 test-sln/.vs
 test-sln/x64
 test-sln/x86
+test-sln/Debug
