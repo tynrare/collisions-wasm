@@ -9,12 +9,14 @@ interface b2AABB {
 };
 
 interface Collisions {
-	void Collisions();
+	void Collisions(long extend_margin);
 	void b2AABB_setPos(b2AABB a, float x, float y);
+	b2AABB b2AABB_ConstructFromCenterSizeP(float x, float y, float w, float h);
 	[Value] b2AABB b2AABB_ConstructFromCenterSize(float x, float y, float w, float h);
 	[Value] b2AABB b2AABB_ExtendBySize([Ref] b2AABB a, float w, float h);
 	[Value] b2Vec2 test(b2AABB a, float tx, float ty);
 	b2AABB addAABB(DOMString id, float x, float y, float w, float h);
-	void eraseAABB(DOMString id);
+	boolean eraseAABB(DOMString id);
 	void clear();
+	void freeP(any p);
 };

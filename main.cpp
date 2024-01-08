@@ -101,8 +101,8 @@ class Collisions {
 		b2Vec2 extents = b2AABB_Extents(collider);
 		b2Vec2 pos = b2AABB_Center(collider);
 		for(auto &b : colliders) {
-			b2Vec2 bpos = b2AABB_Center(b);
-			b2Vec2 bextents = b2AABB_Extents(b);
+			//b2Vec2 bpos = b2AABB_Center(b);
+			//b2Vec2 bextents = b2AABB_Extents(b);
 
 			b2Vec2 d1 = { b.lowerBound.x - (pos.x + extents.x), b.lowerBound.y - (pos.y + extents.y) };
 			b2Vec2 d2 = { (pos.x - extents.x) - b.upperBound.x, (pos.y - extents.y) - b.upperBound.y };
@@ -155,8 +155,9 @@ class Collisions {
 			}
 		}
 		
+		b2Vec2 newpos = {0};
 		// push out of any bounds
-		b2Vec2 newpos = simpleAABBCollision(*a, colliders, extend_margin);
+		newpos = simpleAABBCollision(*a, colliders, extend_margin);
 		// swept move
 		int iterations = 0;
 		newpos = sweptAABBCollision(&iterations, newpos, target, colliders_extended, extend_margin);
@@ -171,10 +172,19 @@ class Collisions {
 		return aabb;
 	}
 	
-	inline void eraseAABB(const char *id) {
+	/**
+	* @returns true if memory was cleared
+	*/
+	inline bool eraseAABB(const char *id) {
 		auto it = b2AABBs.find(std::string(id));
-		b2AABBs.erase(it);
-		free(it->second);
+		if (it != b2AABBs.end()) {
+			b2AABBs.erase(it);
+			free(it->second);
+
+			return true;
+		}
+
+		return false;
 	}
 	
 	inline void clear() {
@@ -183,5 +193,9 @@ class Collisions {
 		}
 
 		b2AABBs.clear();
+	}
+
+	inline void freeP(void* p) {
+		free(p);
 	}
 };
