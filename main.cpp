@@ -138,23 +138,17 @@ class Collisions {
 		float uy = fmaxf(oy, ty);
 		b2AABB rayaabb = { { lx, ly },  { ux, uy } };
 
-		std::vector<b2AABB> colliders;
+		b2RayCastOutput raycast_closest = { 0 }; // closest ro;
 		for (auto& e : b2AABBs) {
 			b2AABB* box = e.second;
 
 			if (b2AABB_Overlaps(rayaabb, *box)) {
-				colliders.push_back(*box);
-			}
-		}
+				b2RayCastOutput ro = b2AABB_RayCast(*box, pos, target);
 
-		b2RayCastOutput raycast_closest = { 0 }; // closest ro;
-		for (auto& box : colliders) {
-
-			b2RayCastOutput ro = b2AABB_RayCast(box, pos, target);
-
-			if (ro.hit) {
-				if (!raycast_closest.hit || raycast_closest.fraction > ro.fraction) {
-					raycast_closest = ro;
+				if (ro.hit) {
+					if (!raycast_closest.hit || raycast_closest.fraction > ro.fraction) {
+						raycast_closest = ro;
+					}
 				}
 			}
 		}

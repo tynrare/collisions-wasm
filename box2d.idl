@@ -12,6 +12,7 @@ interface b2RayCastOutput {
 	[Value] attribute b2Vec2 normal;
 	[Value] attribute b2Vec2 point;
 	attribute boolean hit;
+	attribute float fraction;
 };
 
 interface Collisions {
