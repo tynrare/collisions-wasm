@@ -8,13 +8,15 @@ int main()
 {
     Collisions *collisions = new Collisions();
     collisions->addAABB("a", 0, 0, 16, 16);
-    collisions->addAABB("a", 0, 16, 16, 16);
+    collisions->addAABB("b", 0, 16, 16, 16);
     //b2AABB testbox = collisions->b2AABB_ConstructFromCenterSize(-32, 0, 16, 16);
-    b2AABB *testbox = collisions->addAABB("b", -32, 0, 16, 16);
-    b2Vec2 res = collisions->test(testbox, 32, 0);
+    b2AABB *testbox = collisions->addAABB("c", -32, 0, 16, 16);
+    b2Vec2 res1 = collisions->test(testbox, 32, 0);
+    b2RayCastOutput res2 = collisions->testRay(-32, 0, 32, 0);
 
     delete collisions;
-    std::cout << "x: " << res.x << " y: " << res.y;
+    std::cout << "1x: " << res1.x << " 1y: " << res1.y << "\n";
+    std::cout << "2x: " << res2.point.x << " 2y: " << res2.point.y;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

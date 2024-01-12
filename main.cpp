@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <stdlib.h>
+#include <math.h>
 
 class Collisions {
 	private:
@@ -59,14 +60,9 @@ class Collisions {
 	inline b2Vec2 sweptAABBCollision(int *iteration, b2Vec2 &pos, b2Vec2 &target, std::vector<b2AABB>& colliders, int extend_margin) {
 		*iteration += 1;
 
-		// this whole process has to be recursive
 		b2RayCastOutput raycast_closest = { 0 }; // closest ro;
 		for (auto &box : colliders) {
-
-			// does not work from inside
 			b2RayCastOutput ro = b2AABB_RayCast(box, pos, target);
-
-			// main issue right now: ray clips on corners
 			if (ro.hit) {
 				if (!raycast_closest.hit || raycast_closest.fraction > ro.fraction) {
 					raycast_closest = ro;
@@ -113,8 +109,8 @@ class Collisions {
 			if (d2.x > 0.0f || d2.y > 0.0f)
 				continue;
 
-			int x = -B2_MAX(d1.x, d2.x);
-			int y = -B2_MAX(d1.y, d2.y);
+			float x = -B2_MAX(d1.x, d2.x);
+			float y = -B2_MAX(d1.y, d2.y);
 			int normal_y = d1.y > d2.y ? 1 : -1;
 			int normal_x = d1.x > d2.x ? 1 : -1;
 
@@ -131,6 +127,39 @@ class Collisions {
 		}
 
 		return pos;
+	}
+
+	inline b2RayCastOutput testRay(float ox, float oy, float tx, float ty) {
+		b2Vec2 pos = { ox, oy };
+		b2Vec2 target = { tx, ty };
+		float lx = fminf(ox, tx);
+		float ly = fminf(oy, ty);
+		float ux = fmaxf(ox, tx);
+		float uy = fmaxf(oy, ty);
+		b2AABB rayaabb = { { lx, ly },  { ux, uy } };
+
+		std::vector<b2AABB> colliders;
+		for (auto& e : b2AABBs) {
+			b2AABB* box = e.second;
+
+			if (b2AABB_Overlaps(rayaabb, *box)) {
+				colliders.push_back(*box);
+			}
+		}
+
+		b2RayCastOutput raycast_closest = { 0 }; // closest ro;
+		for (auto& box : colliders) {
+
+			b2RayCastOutput ro = b2AABB_RayCast(box, pos, target);
+
+			if (ro.hit) {
+				if (!raycast_closest.hit || raycast_closest.fraction > ro.fraction) {
+					raycast_closest = ro;
+				}
+			}
+		}
+
+		return raycast_closest;
 	}
 	
 	inline b2Vec2 test(	b2AABB *a, float tx, float ty) {

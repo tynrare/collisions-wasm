@@ -8,6 +8,12 @@ interface b2AABB {
 	[Value] attribute b2Vec2 upperBound;
 };
 
+interface b2RayCastOutput {
+	[Value] attribute b2Vec2 normal;
+	[Value] attribute b2Vec2 point;
+	attribute boolean hit;
+};
+
 interface Collisions {
 	void Collisions(long extend_margin);
 	void b2AABB_setPos(b2AABB a, float x, float y);
@@ -15,6 +21,7 @@ interface Collisions {
 	[Value] b2AABB b2AABB_ConstructFromCenterSize(float x, float y, float w, float h);
 	[Value] b2AABB b2AABB_ExtendBySize([Ref] b2AABB a, float w, float h);
 	[Value] b2Vec2 test(b2AABB a, float tx, float ty);
+	[Value] b2RayCastOutput testRay(float ox, float oy, float tx, float ty);
 	b2AABB addAABB(DOMString id, float x, float y, float w, float h);
 	boolean eraseAABB(DOMString id);
 	void clear();
